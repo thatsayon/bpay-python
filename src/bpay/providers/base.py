@@ -1,17 +1,15 @@
 from abc import ABC, abstractmethod
 
-from bpay.schemas.payment import PaymentResponse
+from bpay.schemas.payment import (
+    CreatePaymentRequest,
+    PaymentResponse,
+)
 
 
 class BaseProvider(ABC):
     @abstractmethod
-    async def create_payment(self) -> PaymentResponse:
-        pass
-
-    @abstractmethod
-    async def verify_payment(self) -> PaymentResponse:
-        pass
-
-    @abstractmethod
-    async def refund_payment(self) -> PaymentResponse:
+    async def create_payment(
+        self,
+        payload: CreatePaymentRequest,
+    ) -> PaymentResponse:
         pass
