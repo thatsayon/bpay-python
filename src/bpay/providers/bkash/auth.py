@@ -1,7 +1,9 @@
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import httpx
 
+from bpay.exceptions import AuthenticationError
 from bpay.providers.bkash.schemas import (
     BkashCredentials,
     BkashTokenResponse,
@@ -11,10 +13,18 @@ from bpay.providers.bkash.schemas import (
 class BkashAuth:
     BASE_URL = "https://tokenized.sandbox.bka.sh/v1.2.0-beta"
 
-    def __init__(self, credentials: BkashCredentials) -> None:
+    def __init__(
+        self,
+        credentials: BkashCredentials,
+    ) -> None:
         self.credentials = credentials
 
-    async def authenticate(self) -> BkashTokenResponse:
+        self._token: BkashTokenResponse | None = None
+        self._expires_at: datetime | None = None
+
+    async def authenticate(
+        self,
+    ) -> BkashTokenResponse:
         url = f"{self.BASE_URL}/tokenized/checkout/token/grant"
 
         headers = {
@@ -39,9 +49,28 @@ class BkashAuth:
 
         data: dict[str, Any] = response.json()
 
+        if data.get("statusCode") != "0000":
+            raise AuthenticationError(f"bKash authentication failed: {data}")
+
         return BkashTokenResponse(
-            id_token=data["id_token"],
-            refresh_token=data["refresh_token"],
-            token_type=data["token_type"],
-            expires_in=data["expires_in"],
+            id_token=str(data["id_token"]),
+            refresh_token=str(data["refresh_token"]),
+            token_type=str(data["token_type"]),
+            expires_in=int(data["expires_in"]),
         )
+
+    async def get_token(self) -> str:
+        if (
+            self._token is not None
+            and self._expires_at is not None
+            and datetime.now(UTC) < self._expires_at
+        ):
+            return self._token.id_token
+
+        token = await self.authenticate()
+
+        self._token = token
+
+        self._expires_at = datetime.now(UTC) + timedelta(seconds=token.expires_in - 60)
+
+        return token.id_token

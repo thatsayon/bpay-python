@@ -2,6 +2,7 @@ from typing import Any
 
 import httpx
 
+from bpay.exceptions import AgreementError
 from bpay.providers.bkash.auth import BkashAuth
 from bpay.providers.bkash.constants import (
     BKASH_AGREEMENT_STATUS_MAP,
@@ -22,16 +23,14 @@ class BkashAgreement:
         self,
         payload: CreateAgreementRequest,
     ) -> AgreementResponse:
-        token = await self.auth.authenticate()
+        # token = await self.auth.authenticate()
+        token = await self.auth.get_token()
 
-        url = (
-            f"{self.BASE_URL}"
-            "/tokenized/checkout/create"
-        )
+        url = f"{self.BASE_URL}/tokenized/checkout/create"
 
         headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {token.id_token}",
+            "Authorization": f"Bearer {token}",
             "X-APP-Key": self.auth.credentials.app_key,
         }
 
@@ -51,12 +50,13 @@ class BkashAgreement:
         response.raise_for_status()
 
         data: dict[str, Any] = response.json()
-        
+
+        if data.get("statusCode") != "0000":
+            raise AgreementError(f"Agreement creation failed: {data}")
+
         return AgreementResponse(
             agreement_id="",
             payment_id=str(data["paymentID"]),
             checkout_url=str(data["bkashURL"]),
-            status=BKASH_AGREEMENT_STATUS_MAP[
-                str(data["agreementStatus"])
-            ],
+            status=BKASH_AGREEMENT_STATUS_MAP[str(data["agreementStatus"])],
         )
