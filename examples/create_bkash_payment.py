@@ -1,6 +1,9 @@
 import asyncio
 
 from bpay import BPay
+from bpay.config.environments import (
+    Environment,
+)
 from bpay.schemas.payment import (
     CreatePaymentRequest,
 )
@@ -9,6 +12,7 @@ from bpay.schemas.payment import (
 async def main() -> None:
     client = BPay(
         provider="bkash",
+        environment=Environment.SANDBOX,
         username="sandboxTokenizedUser02",
         password="sandboxTokenizedUser02@12345",
         app_key="4f6o0cjiki2rfm34kfdadl1eqq",

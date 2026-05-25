@@ -16,8 +16,10 @@ class BkashAuth:
     def __init__(
         self,
         credentials: BkashCredentials,
+        base_url: str
     ) -> None:
         self.credentials = credentials
+        self.base_url = base_url
 
         self._token: BkashTokenResponse | None = None
         self._expires_at: datetime | None = None
@@ -25,7 +27,7 @@ class BkashAuth:
     async def authenticate(
         self,
     ) -> BkashTokenResponse:
-        url = f"{self.BASE_URL}/tokenized/checkout/token/grant"
+        url = f"{self.base_url}/tokenized/checkout/token/grant"
 
         headers = {
             "Content-Type": "application/json",

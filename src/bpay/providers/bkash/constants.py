@@ -6,3 +6,12 @@ BKASH_AGREEMENT_STATUS_MAP = {
     "Cancelled": AgreementStatus.CANCELLED,
     "Failure": AgreementStatus.FAILED,
 }
+
+BKASH_BASE_URLS = {
+    "sandbox": (
+        "https://tokenized.sandbox.bka.sh/v1.2.0-beta"
+    ),
+    "production": (
+        "https://tokenized.pay.bka.sh/v1.2.0-beta"
+    ),
+}
