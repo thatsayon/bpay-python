@@ -1,16 +1,16 @@
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel
 
 from bpay.types import PaymentStatus
 
 
 class CreatePaymentRequest(BaseModel):
     amount: float
-    callback_url: HttpUrl
+    callback_url: str
     currency: str = "BDT"
     intent: str = "sale"
 
 
 class PaymentResponse(BaseModel):
     payment_id: str
-    checkout_url: HttpUrl
+    checkout_url: str
     status: PaymentStatus

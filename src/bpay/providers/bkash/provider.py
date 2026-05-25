@@ -1,13 +1,22 @@
 from bpay.providers.bkash.agreement import (
     BkashAgreement,
 )
-from bpay.providers.bkash.auth import BkashAuth
+from bpay.providers.bkash.auth import (
+    BkashAuth,
+)
+from bpay.providers.bkash.payment import (
+    BkashPayment,
+)
 from bpay.providers.bkash.schemas import (
     BkashCredentials,
 )
 from bpay.schemas.agreement import (
     AgreementResponse,
     CreateAgreementRequest,
+)
+from bpay.schemas.payment import (
+    CreatePaymentRequest,
+    PaymentResponse,
 )
 
 
@@ -26,12 +35,34 @@ class BkashProvider:
             app_secret=app_secret,
         )
 
-        auth = BkashAuth(credentials)
+        auth = BkashAuth(
+            credentials
+        )
 
-        self.agreement_service = BkashAgreement(auth)
+        self.agreement_service = (
+            BkashAgreement(auth)
+        )
+
+        self.payment_service = (
+            BkashPayment(auth)
+        )
 
     async def create_agreement(
         self,
         payload: CreateAgreementRequest,
     ) -> AgreementResponse:
-        return await self.agreement_service.create(payload)
+        return await (
+            self.agreement_service.create(
+                payload
+            )
+        )
+
+    async def create_payment(
+        self,
+        payload: CreatePaymentRequest,
+    ) -> PaymentResponse:
+        return await (
+            self.payment_service.create(
+                payload
+            )
+        )
